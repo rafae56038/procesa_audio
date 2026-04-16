@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía de instalación — procesa_audio</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3149;
+      --text: #e2e4f0;
+      --muted: #7b7f9e;
+      --cpu: #3b82f6;
+      --nvidia: #76b900;
+      --amd: #ed1c24;
+      --code-bg: #12141e;
+      --tag-bg: #1e2235;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--muted);
+    }
+
+    /* Nav pills */
+    .nav {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .nav a {
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 2px solid;
+      transition: background 0.15s;
+    }
+
+    .nav a.cpu   { color: var(--cpu);    border-color: var(--cpu);    }
+    .nav a.nvidia { color: var(--nvidia); border-color: var(--nvidia); }
+    .nav a.amd   { color: var(--amd);    border-color: var(--amd);    }
+    .nav a.pre   { color: var(--muted);  border-color: var(--border); }
+
+    .nav a:hover { background: var(--surface2); }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+      padding: 0.25rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .badge.cpu    { background: #1d3461; color: var(--cpu); }
+    .badge.nvidia { background: #1a2e00; color: var(--nvidia); }
+    .badge.amd    { background: #2e0506; color: var(--amd); }
+
+    .card-header h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .card-header .speed {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Steps */
+    .step {
+      margin-bottom: 1.5rem;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .step-title span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      background: var(--surface2);
+      font-size: 0.75rem;
+      margin-right: 0.5rem;
+      color: var(--muted);
+    }
+
+    p { margin-bottom: 0.75rem; color: var(--text); }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin: 0.5rem 0 1rem;
+      position: relative;
+    }
+
+    code { font-family: "Cascadia Code", "Fira Code", monospace; }
+
+    pre code { color: #c9d1d9; }
+
+    .comment { color: #6e7681; }
+    .cmd     { color: #79c0ff; }
+
+    /* Copy button */
+    .copy-btn {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.6rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .copy-btn:hover { color: var(--text); background: var(--border); }
+
+    /* Note / warning */
+    .note {
+      background: var(--tag-bg);
+      border-left: 3px solid var(--muted);
+      border-radius: 0 6px 6px 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0.75rem 0 1rem;
+    }
+
+    .note.warn { border-color: #f59e0b; color: #fbbf24; background: #1c1500; }
+
+    /* Table */
+    .table-wrap { overflow-x: auto; margin-top: 1rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--surface2);
+      padding: 0.65rem 1rem;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tag.ok   { background: #0d2e17; color: #4ade80; }
+    .tag.no   { background: #2e0f0f; color: #f87171; }
+    .tag.slow { background: #1c1500; color: #fbbf24; }
+    .tag.fast { background: #0d2e17; color: #4ade80; }
+
+    /* Prereqs */
+    ul.prereq {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul.prereq li {
+      padding: 0.35rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    ul.prereq li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--muted);
+    }
+
+    /* Section heading */
+    .section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    /* inline code */
+    p code, li code {
+      background: var(--tag-bg);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #c9d1d9;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Guía de instalación</h1>
+    <p>procesa_audio — análisis de sentimiento en audio con IA</p>
+  </header>
+
+  <nav class="nav">
+    <a href="#prereqs" class="pre">Requisitos previos</a>
+    <a href="#cpu"    class="cpu">Opción 1 — CPU</a>
+    <a href="#nvidia" class="nvidia">Opción 2 — NVIDIA</a>
+    <a href="#amd"    class="amd">Opción 3 — AMD ROCm</a>
+    <a href="#resumen" class="pre">Resumen</a>
+  </nav>
+
+  <!-- PREREQS -->
+  <p class="section-title">Para todos los casos</p>
+  <div class="card" id="prereqs">
+    <div class="card-header">
+      <h2>Requisitos previos</h2>
+    </div>
+
+    <ul class="prereq">
+      <li>Python 3.10 o superior</li>
+      <li><code>git</code> instalado</li>
+      <li>Al menos 6 GB de RAM libre</li>
+    </ul>
+
+    <pre><code><span class="cmd">git clone</span> &lt;url-del-repo&gt;
+<span class="cmd">cd</span> procesa_audio
+<span class="cmd">python -m venv</span> venv</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+  </div>
+
+  <!-- CPU -->
+  <p class="section-title">Opción 1</p>
+  <div class="card" id="cpu">
+    <div class="card-header">
+      <span class="badge cpu">CPU</span>
+      <h2>Sin GPU — Windows o Linux</h2>
+      <span class="speed">~50-90 seg por audio</span>
+    </div>
+
+    <p>Funciona en cualquier máquina. No requiere configuración especial.</p>
+
+    <div class="step">
+      <div class="step-title"><span>1</span>Activar entorno virtual</div>
+      <pre><code><span class="comment"># Windows</span>
+venv\Scripts\activate
+
+<span class="comment"># Linux</span>
+source venv/bin/activate</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>2</span>Instalar dependencias</div>
+      <pre><code><span class="cmd">pip install</span> torch torchvision torchaudio
+<span class="cmd">pip install</span> faster-whisper transformers librosa pysentimiento</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <p>Scripts disponibles: <code>procesar_audio_vf.py</code>, <code>procesar_audio_chunk.py</code></p>
+  </div>
+
+  <!-- NVIDIA -->
+  <p class="section-title">Opción 2</p>
+  <div class="card" id="nvidia">
+    <div class="card-header">
+      <span class="badge nvidia">NVIDIA</span>
+      <h2>GPU NVIDIA + CUDA — Windows o Linux</h2>
+      <span class="speed">~5-10 seg por audio</span>
+    </div>
+
+    <p>Requiere GPU NVIDIA con al menos 6 GB VRAM. Recomendado: RTX 3060 12 GB o superior.</p>
+
+    <div class="step">
+      <div class="step-title"><span>1</span>Verificar que CUDA está instalado</div>
+      <pre><code>nvidia-smi</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+      <p>Debes ver el driver y la versión de CUDA. Si no aparece, instala los drivers desde el sitio de NVIDIA.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>2</span>Activar entorno virtual</div>
+      <pre><code><span class="comment"># Windows</span>
+venv\Scripts\activate
+
+<span class="comment"># Linux</span>
+source venv/bin/activate</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>3</span>Instalar PyTorch con CUDA</div>
+      <p>Elige según la versión de CUDA que reportó <code>nvidia-smi</code>:</p>
+      <pre><code><span class="comment"># CUDA 12.1 (más común en drivers recientes)</span>
+<span class="cmd">pip install</span> torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+<span class="comment"># CUDA 11.8</span>
+<span class="cmd">pip install</span> torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>4</span>Resto de dependencias</div>
+      <pre><code><span class="cmd">pip install</span> faster-whisper transformers librosa pysentimiento</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>5</span>Verificar</div>
+      <pre><code><span class="cmd">python -c</span> "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+      <p>Debe imprimir <code>True</code> y el nombre de tu GPU.</p>
+    </div>
+
+    <p>Scripts disponibles: todos, incluyendo <code>test_gpu.py</code></p>
+  </div>
+
+  <!-- AMD -->
+  <p class="section-title">Opción 3</p>
+  <div class="card" id="amd">
+    <div class="card-header">
+      <span class="badge amd">AMD</span>
+      <h2>GPU AMD + ROCm — solo Linux</h2>
+      <span class="speed">~8-15 seg por audio</span>
+    </div>
+
+    <p>Requiere GPU AMD RDNA2 o superior (RX 6000 series en adelante). La RX 6650 XT es compatible (gfx1032).</p>
+
+    <div class="note warn">
+      Windows con AMD no está soportado por estas librerías. Usar Linux (Ubuntu 22.04 recomendado).
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>1</span>Instalar ROCm</div>
+      <p>Para Ubuntu 22.04:</p>
+      <pre><code><span class="cmd">sudo apt update</span>
+<span class="cmd">wget</span> https://repo.radeon.com/amdgpu-install/6.0/ubuntu/jammy/amdgpu-install_6.0.60000-1_all.deb
+<span class="cmd">sudo dpkg -i</span> amdgpu-install_6.0.60000-1_all.deb
+<span class="cmd">sudo amdgpu-install</span> --usecase=rocm
+<span class="cmd">sudo usermod -aG</span> render,video $LOGNAME
+<span class="comment"># Reiniciar sesión</span></code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>2</span>Verificar ROCm</div>
+      <pre><code>rocm-smi</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+      <p>Debes ver tu GPU listada.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>3</span>Activar entorno virtual e instalar PyTorch con ROCm</div>
+      <pre><code>source venv/bin/activate
+<span class="cmd">pip install</span> torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>4</span>Resto de dependencias</div>
+      <pre><code><span class="cmd">pip install</span> transformers librosa pysentimiento</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+      <div class="note">
+        <code>faster-whisper</code> usa CTranslate2 que no soporta ROCm. El script <code>test_gpu.py</code> usa Whisper vía <code>transformers</code>, que sí es compatible.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span>5</span>Verificar</div>
+      <pre><code><span class="cmd">python -c</span> "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+      <p>En ROCm, PyTorch expone la GPU AMD bajo el nombre <code>cuda</code>. Debe imprimir <code>True</code>.</p>
+    </div>
+
+    <p>Scripts disponibles: <code>test_gpu.py</code></p>
+  </div>
+
+  <!-- RESUMEN -->
+  <p class="section-title">Resumen</p>
+  <div class="card" id="resumen">
+    <div class="card-header">
+      <h2>Tabla comparativa</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>CPU</th>
+            <th>NVIDIA + CUDA</th>
+            <th>AMD + ROCm</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Windows</td>
+            <td><span class="tag ok">Si</span></td>
+            <td><span class="tag ok">Si</span></td>
+            <td><span class="tag no">No</span></td>
+          </tr>
+          <tr>
+            <td>Linux</td>
+            <td><span class="tag ok">Si</span></td>
+            <td><span class="tag ok">Si</span></td>
+            <td><span class="tag ok">Si</span></td>
+          </tr>
+          <tr>
+            <td>Script principal</td>
+            <td><code>procesar_audio_vf.py</code></td>
+            <td><code>procesar_audio_vf.py</code></td>
+            <td><code>test_gpu.py</code></td>
+          </tr>
+          <tr>
+            <td>Whisper backend</td>
+            <td>faster-whisper</td>
+            <td>faster-whisper</td>
+            <td>transformers</td>
+          </tr>
+          <tr>
+            <td>Velocidad</td>
+            <td><span class="tag slow">Lenta</span></td>
+            <td><span class="tag fast">Rapida</span></td>
+            <td><span class="tag fast">Rapida</span></td>
+          </tr>
+          <tr>
+            <td>VRAM minima</td>
+            <td>—</td>
+            <td>6 GB</td>
+            <td>6 GB</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <br>
+    <p>Independientemente de la opción elegida, verifica que todo funciona con:</p>
+    <pre><code><span class="cmd">python</span> test_gpu.py</code><button class="copy-btn" onclick="copyCode(this)">copiar</button></pre>
+    <p>El script detecta automáticamente si hay GPU disponible e informa qué hardware está usando.</p>
+  </div>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.parentElement;
+    const text = pre.innerText.replace("copiar", "").trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = "copiado";
+      setTimeout(() => btn.textContent = "copiar", 1500);
+    });
+  }
+</script>
+</body>
+</html>
